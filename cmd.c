@@ -8,7 +8,7 @@
 #define MAX_TITLE 50
 #define MAX_BODY 100
 
-static int get_line(char *arr);
+static int get_line(char *arr, int limit);
 static int read_cb(void *NotUsed, int argc, char **argv, char **azColName);
 
 void add_item(void) {
@@ -18,9 +18,9 @@ void add_item(void) {
   int conn;
 
   printf("What do you want to add? ");
-  get_line(title);
+  get_line(title, MAX_TITLE);
   printf("Write down the details (Optional): ");
-  get_line(body);
+  get_line(body, MAX_BODY);
   sprintf(sql, "INSERT INTO todo (title, body) VALUES ('%s', '%s')", title,
           body);
 
@@ -71,11 +71,11 @@ void delete_item(void) {
   sqlite3_close(db);
 }
 
-static int get_line(char *arr) {
+static int get_line(char *arr, int limit) {
   int ch, len = 0;
 
   while ((ch = getchar()) != '\n') {
-    if (len == 100) {
+    if (len == limit) {
       break;
     }
     *arr++ = ch;
