@@ -13,10 +13,8 @@ static int read_cb(void *NotUsed, int argc, char **argv, char **azColName);
 
 void add_item(void) {
   sqlite3 *db;
-  char *title, *body, *sql, *err_msg = 0;
-  title = malloc(sizeof(char) * MAX_TITLE + 1);
-  body = malloc(sizeof(char) * MAX_BODY + 1);
-  sql = malloc(sizeof(title) + sizeof(body) + 50);
+  char title[MAX_TITLE + 1], body[MAX_BODY + 1],
+      sql[sizeof(title) + sizeof(body) + 50], *err_msg = NULL;
   int conn;
 
   printf("What do you want to add? ");
@@ -33,23 +31,45 @@ void add_item(void) {
     exit(EXIT_FAILURE);
   }
 
-  printf("Successfully added title: %s body: %s\n", title, body);
+  printf("\nSuccessfully added title: %s body: %s\n", title, body);
   sqlite3_close(db);
-  free(title);
-  free(body);
-  free(sql);
 }
 
 void read_items(void) {
   sqlite3 *db = db_init();
-  char *err_msg, *sql = "SELECT * FROM todo";
+  char *err_msg = NULL, *sql = "SELECT * FROM todo";
+  int conn;
 
   printf("ID\tTitle\tBody\tCreated At\n");
-  sqlite3_exec(db, sql, read_cb, 0, &err_msg);
+  conn = sqlite3_exec(db, sql, read_cb, 0, &err_msg);
+  if (conn != SQLITE_OK) {
+    fprintf(stderr, "Error: %s\n", err_msg);
+    exit(EXIT_FAILURE);
+  }
+  printf("\n");
+
   sqlite3_close(db);
 }
 
-void delete_item(void) {}
+void delete_item(void) {
+  sqlite3 *db;
+  int delete_id, conn;
+  char sql[50], *err_msg = NULL;
+  printf("Write the id of the item you want to delete: ");
+  scanf("%d", &delete_id);
+
+  sprintf(sql, "DELETE FROM todo WHERE id = %d", delete_id);
+
+  db = db_init();
+  conn = sqlite3_exec(db, sql, 0, 0, err_msg);
+  if (conn != SQLITE_OK) {
+    fprintf(stderr, "Error: %s\n", err_msg);
+  }
+
+  printf("Successfully deleted id: %d\n", delete_id);
+
+  sqlite3_close(db);
+}
 
 static int get_line(char *arr) {
   int ch, len = 0;
