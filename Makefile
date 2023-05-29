@@ -4,7 +4,7 @@ LIBS = -lsqlite3
 
 SRCS = db.c cmd.c main.c
 OBJS = $(addprefix output/,$(SRCS:.c=.o))
-TARGET = output/program
+TARGET = output/todo
 
 .PHONY: all clean
 

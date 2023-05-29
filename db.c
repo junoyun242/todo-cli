@@ -15,7 +15,7 @@ sqlite3 *db_init() {
   }
 
   char file_loc[256];
-  snprintf(file_loc, sizeof(file_loc), "%s/test.db", home_dir);
+  snprintf(file_loc, sizeof(file_loc), "%s/todo.db", home_dir);
   int conn = sqlite3_open(file_loc, &db);
 
   if (conn != SQLITE_OK) {
