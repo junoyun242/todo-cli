@@ -3,21 +3,28 @@
 #include <sqlite3.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-#define MAX_CONTENT 100
+#define MAX_TITLE 50
+#define MAX_BODY 100
 
 static int get_line(char *arr);
+static int read_cb(void *NotUsed, int argc, char **argv, char **azColName);
 
-bool add_item(void) {
+void add_item(void) {
   sqlite3 *db;
-  char *content, *sql, *err_msg = 0;
-  content = malloc(sizeof(char) * MAX_CONTENT + 1);
-  sql = malloc(sizeof(content) + 50);
+  char *title, *body, *sql, *err_msg = 0;
+  title = malloc(sizeof(char) * MAX_TITLE + 1);
+  body = malloc(sizeof(char) * MAX_BODY + 1);
+  sql = malloc(sizeof(title) + sizeof(body) + 50);
   int conn;
 
   printf("What do you want to add? ");
-  get_line(content);
-  sprintf(sql, "INSERT INTO todo (title) VALUES ('%s')", content);
+  get_line(title);
+  printf("Write down the details (Optional): ");
+  get_line(body);
+  sprintf(sql, "INSERT INTO todo (title, body) VALUES ('%s', '%s')", title,
+          body);
 
   db = db_init();
   conn = sqlite3_exec(db, sql, 0, 0, &err_msg);
@@ -26,15 +33,22 @@ bool add_item(void) {
     exit(EXIT_FAILURE);
   }
 
-  printf("added");
+  printf("Successfully added title: %s body: %s\n", title, body);
   sqlite3_close(db);
-  free(content);
+  free(title);
+  free(body);
   free(sql);
-
-  return true;
 }
 
-void read_items(void) {}
+void read_items(void) {
+  sqlite3 *db = db_init();
+  char *err_msg, *sql = "SELECT * FROM todo";
+
+  printf("ID\tTitle\tBody\tCreated At\n");
+  sqlite3_exec(db, sql, read_cb, 0, &err_msg);
+  sqlite3_close(db);
+}
+
 void delete_item(void) {}
 
 static int get_line(char *arr) {
@@ -48,6 +62,15 @@ static int get_line(char *arr) {
     len++;
   }
 
-  *arr++ = '\n';
+  *arr++ = '\0';
   return len;
+}
+
+static int read_cb(void *NotUsed, int argc, char **argv, char **azColName) {
+  (void)NotUsed, (void)azColName;
+  for (int i = 0; i < argc; i++) {
+    printf("%s\t", argv[i] ? argv[i] : "");
+  }
+  printf("\n");
+  return 0;
 }

@@ -5,7 +5,8 @@
 
 sqlite3 *db_init() {
   sqlite3 *db;
-  sqlite3_stmt *res;
+  sqlite3_stmt *res = NULL;
+  char *err_msg;
 
   char *home_dir = getenv("HOME");
   if (home_dir == NULL) {
@@ -23,13 +24,16 @@ sqlite3 *db_init() {
     exit(EXIT_FAILURE);
   }
 
-  conn = sqlite3_prepare_v2(
+  conn = sqlite3_exec(
       db,
       "CREATE TABLE IF NOT EXISTS todo (id INTEGER PRIMARY KEY "
-      "NOT NULL, title TEXT NOT NULL)",
-      -1, &res, 0);
+      "NOT NULL, title TEXT NOT NULL, body TEXT, createdAt datetime "
+      "default current_timestamp)",
+      0, 0, &err_msg);
+
   if (conn != SQLITE_OK) {
-    fprintf(stderr, "error: %s\n", sqlite3_errmsg(db));
+    fprintf(stderr, "error: %s\n", err_msg);
+    exit(EXIT_FAILURE);
   }
 
   return db;

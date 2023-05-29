@@ -3,7 +3,7 @@
 
 #include <stdbool.h>
 
-bool add_item(void);
+void add_item(void);
 void read_items(void);
 void delete_item(void);
 
