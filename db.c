@@ -5,7 +5,6 @@
 
 sqlite3 *db_init() {
   sqlite3 *db;
-  sqlite3_stmt *res = NULL;
   char *err_msg;
 
   char *home_dir = getenv("HOME");

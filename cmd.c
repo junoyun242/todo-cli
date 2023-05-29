@@ -28,10 +28,11 @@ void add_item(void) {
   conn = sqlite3_exec(db, sql, 0, 0, &err_msg);
   if (conn != SQLITE_OK) {
     fprintf(stderr, "Error: %s\n", err_msg);
+    sqlite3_free(err_msg);
     exit(EXIT_FAILURE);
   }
 
-  printf("\nSuccessfully added title: %s body: %s\n", title, body);
+  printf("\nSuccessfully added title: %s body: %s\n\n", title, body);
   sqlite3_close(db);
 }
 
@@ -44,6 +45,7 @@ void read_items(void) {
   conn = sqlite3_exec(db, sql, read_cb, 0, &err_msg);
   if (conn != SQLITE_OK) {
     fprintf(stderr, "Error: %s\n", err_msg);
+    sqlite3_free(err_msg);
     exit(EXIT_FAILURE);
   }
   printf("\n");
@@ -55,19 +57,29 @@ void delete_item(void) {
   sqlite3 *db;
   int delete_id, conn;
   char sql[50], *err_msg = NULL;
+
   printf("Write the id of the item you want to delete: ");
-  scanf("%d", &delete_id);
+  if (scanf("%d", &delete_id) < 1) {
+    fprintf(stderr, "Error: Invalid input. Please enter an integer.\n");
+    exit(EXIT_FAILURE);
+  }
 
   sprintf(sql, "DELETE FROM todo WHERE id = %d", delete_id);
 
   db = db_init();
-  conn = sqlite3_exec(db, sql, 0, 0, err_msg);
+  conn = sqlite3_exec(db, sql, 0, 0, &err_msg);
   if (conn != SQLITE_OK) {
     fprintf(stderr, "Error: %s\n", err_msg);
+    sqlite3_free(err_msg);
+    exit(EXIT_FAILURE);
+  }
+
+  if (sqlite3_changes(db) == 0) {
+    fprintf(stderr, "There's no item with the id %d\n", delete_id);
+    exit(EXIT_FAILURE);
   }
 
   printf("Successfully deleted id: %d\n", delete_id);
-
   sqlite3_close(db);
 }
 
