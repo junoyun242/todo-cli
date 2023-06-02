@@ -10,7 +10,10 @@
 #define MAX_BODY 100
 
 static int get_line(char *arr, int limit);
-static int read_cb(void *NotUsed, int argc, char **argv, char **azColName);
+static int read_items_cb(void *NotUsed, int argc, char **argv,
+                         char **azColName);
+static int list_topic_db(void *NotUsed, int argc, char **argv,
+                         char **azColName);
 
 void new_topic(void) {
   sqlite3 *db;
@@ -30,6 +33,25 @@ void new_topic(void) {
   }
 
   printf("\nTopic %s successfully created!\n\n", new_topic);
+  sqlite3_close(db);
+}
+
+void list_topic(void) {
+  sqlite3 *db;
+  char sql[30] = "SELECT name FROM topic";
+  int conn;
+
+  db = db_init();
+
+  printf("List of topics\n\n");
+  conn = sqlite3_exec(db, sql, list_topic_db, 0, NULL);
+
+  if (conn != SQLITE_OK) {
+    fprintf(stderr, "error: %s\n", sqlite3_errmsg(db));
+    exit(EXIT_FAILURE);
+  }
+
+  printf("\n");
   sqlite3_close(db);
 }
 
@@ -87,7 +109,7 @@ void read_items(void) {
   int conn;
 
   printf("ID\tTitle\tBody\tTopic\tCreated At\n");
-  conn = sqlite3_exec(db, sql, read_cb, 0, NULL);
+  conn = sqlite3_exec(db, sql, read_items_cb, 0, NULL);
   if (conn != SQLITE_OK) {
     fprintf(stderr, "Error: %s\n", sqlite3_errmsg(db));
     exit(EXIT_FAILURE);
@@ -142,8 +164,20 @@ static int get_line(char *arr, int limit) {
   return len;
 }
 
-static int read_cb(void *NotUsed, int argc, char **argv, char **azColName) {
+static int read_items_cb(void *NotUsed, int argc, char **argv,
+                         char **azColName) {
   (void)NotUsed, (void)azColName;
+  for (int i = 0; i < argc; i++) {
+    printf("%s\t", argv[i] ? argv[i] : "");
+  }
+  printf("\n");
+  return 0;
+}
+
+static int list_topic_db(void *NotUsed, int argc, char **argv,
+                         char **azColName) {
+  (void)NotUsed, (void)azColName;
+
   for (int i = 0; i < argc; i++) {
     printf("%s\t", argv[i] ? argv[i] : "");
   }
