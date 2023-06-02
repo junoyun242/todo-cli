@@ -7,10 +7,10 @@
 int main(int argc, char **argv) {
   if (argc == 1) {
     printf("\nUsage: todo [command]\n\n");
-    printf("topic: add a new topic");
+    printf("topic: add a new topic\n");
     printf("add: add a new item\n");
     printf("ls: print every stored item\n");
-    printf("rm: remove an item\n");
+    printf("rm: remove an item\n\n");
     exit(EXIT_SUCCESS);
   }
 

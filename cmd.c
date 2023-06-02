@@ -15,17 +15,17 @@ static int read_cb(void *NotUsed, int argc, char **argv, char **azColName);
 void new_topic(void) {
   sqlite3 *db;
   int conn;
-  char new_topic[MAX_TOPIC + 1], sql[50], err_msg = NULL;
+  char new_topic[MAX_TOPIC + 1], sql[50];
   printf("Type a new topic name: ");
   get_line(new_topic, MAX_TOPIC);
 
   sprintf(sql, "INSERT INTO topic (name) VALUES ('%s')", new_topic);
   db = db_init();
 
-  conn = sqlite3_exec(db, sql, 0, 0, &err_msg);
+  conn = sqlite3_exec(db, sql, 0, 0, NULL);
 
   if (conn != SQLITE_OK) {
-    fprintf(stderr, "error: %s\n", err_msg);
+    fprintf(stderr, "error: %s\n", sqlite3_errmsg(db));
     exit(EXIT_FAILURE);
   }
 
@@ -37,7 +37,7 @@ void add_item(void) {
   sqlite3 *db;
   sqlite3_stmt *stmt;
   char topic_name[MAX_TOPIC + 1], title[MAX_TITLE + 1], body[MAX_BODY + 1],
-      sql[sizeof(title) + sizeof(body) + 50], *err_msg = NULL;
+      sql[sizeof(title) + sizeof(body) + 50];
   int conn, topic_id;
 
   printf("What is the topic? ");
@@ -69,10 +69,9 @@ void add_item(void) {
           "INSERT INTO todo (title, body, topic_id) VALUES ('%s', '%s', %d)",
           title, body, topic_id);
 
-  conn = sqlite3_exec(db, sql, 0, 0, &err_msg);
+  conn = sqlite3_exec(db, sql, 0, 0, NULL);
   if (conn != SQLITE_OK) {
-    fprintf(stderr, "Error: %s\n", err_msg);
-    sqlite3_free(err_msg);
+    fprintf(stderr, "Error: %s\n", sqlite3_errmsg(db));
     exit(EXIT_FAILURE);
   }
 
@@ -82,16 +81,15 @@ void add_item(void) {
 
 void read_items(void) {
   sqlite3 *db = db_init();
-  char *err_msg = NULL, *sql = "SELECT todo.id, title, body, topic.name, "
-                               "todo.created_at FROM todo JOIN "
-                               "topic ON todo.topic_id == topic.id";
+  char *sql = "SELECT todo.id, title, body, topic.name, "
+              "todo.created_at FROM todo JOIN "
+              "topic ON todo.topic_id == topic.id";
   int conn;
 
   printf("ID\tTitle\tBody\tTopic\tCreated At\n");
-  conn = sqlite3_exec(db, sql, read_cb, 0, &err_msg);
+  conn = sqlite3_exec(db, sql, read_cb, 0, NULL);
   if (conn != SQLITE_OK) {
-    fprintf(stderr, "Error: %s\n", err_msg);
-    sqlite3_free(err_msg);
+    fprintf(stderr, "Error: %s\n", sqlite3_errmsg(db));
     exit(EXIT_FAILURE);
   }
   printf("\n");
@@ -102,7 +100,7 @@ void read_items(void) {
 void delete_item(void) {
   sqlite3 *db;
   int delete_id, conn;
-  char sql[50], *err_msg = NULL;
+  char sql[50];
 
   printf("Write the id of the item you want to delete: ");
   if (scanf("%d", &delete_id) < 1) {
@@ -113,9 +111,9 @@ void delete_item(void) {
   sprintf(sql, "DELETE FROM todo WHERE id = %d", delete_id);
 
   db = db_init();
-  conn = sqlite3_exec(db, sql, 0, 0, &err_msg);
+  conn = sqlite3_exec(db, sql, 0, 0, NULL);
   if (conn != SQLITE_OK) {
-    fprintf(stderr, "Error: %s\n", err_msg);
+    fprintf(stderr, "Error: %s\n", sqlite3_errmsg(db));
     sqlite3_free(db);
     exit(EXIT_FAILURE);
   }
