@@ -12,8 +12,6 @@
 static int get_line(char *arr, int limit);
 static int read_items_cb(void *NotUsed, int argc, char **argv,
                          char **azColName);
-static int list_topic_cb(void *NotUsed, int argc, char **argv,
-                         char **azColName);
 
 void new_topic(void) {
   sqlite3 *db;
@@ -44,7 +42,7 @@ void list_topic(void) {
   db = db_init();
 
   printf("List of topics\n\n");
-  conn = sqlite3_exec(db, sql, list_topic_cb, 0, NULL);
+  conn = sqlite3_exec(db, sql, read_items_cb, 0, NULL);
 
   if (conn != SQLITE_OK) {
     fprintf(stderr, "error: %s\n", sqlite3_errmsg(db));
@@ -262,17 +260,6 @@ static int get_line(char *arr, int limit) {
 static int read_items_cb(void *NotUsed, int argc, char **argv,
                          char **azColName) {
   (void)NotUsed, (void)azColName;
-  for (int i = 0; i < argc; i++) {
-    printf("%s\t", argv[i] ? argv[i] : "");
-  }
-  printf("\n");
-  return 0;
-}
-
-static int list_topic_cb(void *NotUsed, int argc, char **argv,
-                         char **azColName) {
-  (void)NotUsed, (void)azColName;
-
   for (int i = 0; i < argc; i++) {
     printf("%s\t", argv[i] ? argv[i] : "");
   }
