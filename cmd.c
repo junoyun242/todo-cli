@@ -55,6 +55,62 @@ void list_topic(void) {
   sqlite3_close(db);
 }
 
+void rm_topic(void) {
+  sqlite3 *db;
+  sqlite3_stmt *stmt;
+  char topic_name[MAX_TOPIC + 1], sql[MAX_TOPIC + 50], consent[20 + 1];
+  int topic_id, conn;
+
+  printf("Deleting a topic will deleting all the todo items that belong to "
+         "that topic.\n");
+  printf("Do you really want to continue? (y\\n) ");
+  get_line(consent, 20);
+
+  if (consent[0] != 'y') {
+    printf("Process aborted\n");
+    exit(EXIT_SUCCESS);
+  }
+
+  printf("Topic to delete: ");
+  get_line(topic_name, MAX_TOPIC);
+  sprintf(sql, "SELECT id FROM topic WHERE name = '%s'", topic_name);
+
+  db = db_init();
+  conn = sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
+  if (conn != SQLITE_OK) {
+    fprintf(stderr, "error: %s\n", sqlite3_errmsg(db));
+    exit(EXIT_FAILURE);
+  }
+
+  conn = sqlite3_step(stmt);
+  if (conn == SQLITE_ROW) {
+    topic_id = sqlite3_column_int(stmt, 0);
+  } else if (conn == SQLITE_DONE) {
+    fprintf(stderr, "There's no topic named %s\n", topic_name);
+    exit(EXIT_FAILURE);
+  } else {
+    fprintf(stderr, "error: %s\n", sqlite3_errmsg(db));
+    exit(EXIT_FAILURE);
+  }
+
+  sprintf(sql, "DELETE FROM todo WHERE topic_id = %d", topic_id);
+  conn = sqlite3_exec(db, sql, 0, 0, NULL);
+  if (conn != SQLITE_OK) {
+    fprintf(stderr, "error: %s\n", sqlite3_errmsg(db));
+    exit(EXIT_FAILURE);
+  }
+
+  sprintf(sql, "DELETE FROM topic WHERE id = %d", topic_id);
+  conn = sqlite3_exec(db, sql, 0, 0, NULL);
+  if (conn != SQLITE_OK) {
+    fprintf(stderr, "error: %s\n", sqlite3_errmsg(db));
+    exit(EXIT_FAILURE);
+  }
+
+  printf("Successfully delete the topic %s and all the items!\n\n", topic_name);
+  sqlite3_close(db);
+}
+
 void add_item(void) {
   sqlite3 *db;
   sqlite3_stmt *stmt;
@@ -74,7 +130,6 @@ void add_item(void) {
   conn = sqlite3_step(stmt);
   if (conn == SQLITE_ROW) {
     topic_id = sqlite3_column_int(stmt, 0);
-    printf("topic id: %d\n", topic_id);
   } else if (conn == SQLITE_DONE) {
     fprintf(stderr, "There's no topic named %s\n", topic_name);
     exit(EXIT_FAILURE);

@@ -28,6 +28,8 @@ int main(int argc, char **argv) {
     new_topic();
   } else if (strcmp(cmd, "tls") == 0) {
     list_topic();
+  } else if (strcmp(cmd, "trm") == 0) {
+    rm_topic();
   } else {
     fprintf(stderr, "Unknown command %s\n", cmd);
     exit(EXIT_FAILURE);
