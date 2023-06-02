@@ -111,6 +111,46 @@ void rm_topic(void) {
   sqlite3_close(db);
 }
 
+void filter_by_topic(void) {
+  sqlite3 *db;
+  sqlite3_stmt *stmt;
+  char topic_name[MAX_TOPIC + 1], sql[MAX_TOPIC + 100];
+  int topic_id, conn;
+
+  printf("Topic name you want to filter items by: ");
+  get_line(topic_name, MAX_TOPIC);
+
+  db = db_init();
+  sprintf(sql, "SELECT id FROM topic WHERE name = '%s'", topic_name);
+  conn = sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
+  if (conn != SQLITE_OK) {
+    fprintf(stderr, "error: %s\n", sqlite3_errmsg(db));
+    exit(EXIT_FAILURE);
+  }
+
+  conn = sqlite3_step(stmt);
+  if (conn == SQLITE_ROW) {
+    topic_id = sqlite3_column_int(stmt, 0);
+  } else if (conn == SQLITE_DONE) {
+    fprintf(stderr, "There's no topic named %s\n", topic_name);
+    exit(EXIT_FAILURE);
+  } else {
+    fprintf(stderr, "error: %s\n", sqlite3_errmsg(db));
+    exit(EXIT_FAILURE);
+  }
+
+  sprintf(sql,
+          "SELECT id, title, body, created_at FROM todo WHERE topic_id = %d",
+          topic_id);
+  conn = sqlite3_exec(db, sql, read_items_cb, 0, NULL);
+  if (conn != SQLITE_OK) {
+    fprintf(stderr, "error: %s\n", sqlite3_errmsg(db));
+    exit(EXIT_FAILURE);
+  }
+
+  sqlite3_close(db);
+}
+
 void add_item(void) {
   sqlite3 *db;
   sqlite3_stmt *stmt;

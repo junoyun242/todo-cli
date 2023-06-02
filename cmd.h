@@ -7,5 +7,6 @@ void delete_item(void);
 void new_topic(void);
 void list_topic(void);
 void rm_topic(void);
+void filter_by_topic(void);
 
 #endif
