@@ -25,10 +25,23 @@ sqlite3 *db_init() {
 
   conn = sqlite3_exec(
       db,
-      "CREATE TABLE IF NOT EXISTS todo (id INTEGER PRIMARY KEY "
-      "NOT NULL, title TEXT NOT NULL, body TEXT, createdAt datetime "
-      "default current_timestamp)",
+      "CREATE TABLE IF NOT EXISTS topic (id INTEGER PRIMARY KEY NOT NULL, "
+      "name TEXT NOT NULL, created_at datetime default current_timestamp)",
       0, 0, &err_msg);
+
+  if (conn != SQLITE_OK) {
+    fprintf(stderr, "error: %s\n", err_msg);
+    exit(EXIT_FAILURE);
+  }
+
+  conn = sqlite3_exec(db,
+                      "CREATE TABLE IF NOT EXISTS todo (id INTEGER PRIMARY KEY "
+                      "NOT NULL, title TEXT NOT NULL, body TEXT, topic_id "
+                      "INTEGER NOT NULL, created_at datetime "
+                      "default current_timestamp, FOREIGN KEY "
+                      "(topic_id) REFERENCES topic "
+                      "(id))",
+                      0, 0, &err_msg);
 
   if (conn != SQLITE_OK) {
     fprintf(stderr, "error: %s\n", err_msg);

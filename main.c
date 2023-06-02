@@ -7,6 +7,7 @@
 int main(int argc, char **argv) {
   if (argc == 1) {
     printf("\nUsage: todo [command]\n\n");
+    printf("topic: add a new topic");
     printf("add: add a new item\n");
     printf("ls: print every stored item\n");
     printf("rm: remove an item\n");
@@ -22,6 +23,8 @@ int main(int argc, char **argv) {
     read_items();
   } else if (strcmp(cmd, "rm") == 0) {
     delete_item();
+  } else if (strcmp(cmd, "topic") == 0) {
+    new_topic();
   } else {
     fprintf(stderr, "Unknown command %s\n", cmd);
     exit(EXIT_FAILURE);
